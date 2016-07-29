@@ -34,6 +34,9 @@ module Wechat
     def wechat_public_oauth2(oauth2_url)
       if cookies.signed_or_encrypted[:we_openid].blank? && params[:code].blank?
         redirect_to oauth2_url
+      elsif !params[:state].blank? && params[:state] != wechat.jsapi_ticket.oauth2_state 
+        #应对服务器重启后用户使用的访问链接中仍然带state参数，但与wechat.jsapi_ticket.oauth2_state，这时重置整个流程
+        redirect_to oauth2_url
       elsif cookies.signed_or_encrypted[:we_openid].blank? && params[:code].present? \
       && (params[:state] == wechat.jsapi_ticket.oauth2_state || params[:state].blank? && wechat.jsapi_ticket.oauth2_state.blank? )
         access_info = wechat.web_access_token(params[:code])
